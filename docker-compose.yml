@@ -1,0 +1,48 @@
+services:
+  mysql:
+    image: mysql:8.0
+    container_name: mysql
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: database
+      MYSQL_USER: user
+      MYSQL_PASSWORD: password
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+
+  php:
+      build:
+        context: .
+        dockerfile: Dockerfile
+      container_name: php-apache
+      depends_on:
+        - mysql
+      ports:
+        - "8085:80"
+      volumes:
+        - ./app:/var/www/html
+      environment:
+        DB_HOST: mysql
+        DB_USER: user
+        DB_PASSWORD: password
+        DB_NAME: database
+
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin
+    container_name: phpmyadmin
+    depends_on:
+      - mysql
+    restart: always
+    ports:
+      - "8086:80"
+    environment:
+      PMA_HOST: mysql
+      PMA_PORT: 3306
+      PMA_USER: user
+      PMA_PASSWORD: password
+
+volumes:
+  mysql_data:
